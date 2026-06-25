@@ -169,3 +169,48 @@ Shareholder voting
 Budget allocation
 ## CI/CD pipeline supporetd
 chcek action..
+
+```mermaid
+flowchart LR
+
+    subgraph Client Layer
+        U[User]
+        F[Next.js Frontend]
+        W[Freighter Wallet]
+    end
+
+    subgraph Stellar Blockchain
+        SC[VoteX Soroban Smart Contract]
+        DB[(On-chain Storage)]
+    end
+
+    subgraph Governance Features
+        DAO[DAO / Group Creation]
+        MEM[Membership Approval]
+        PROP[Proposal Creation]
+        VOTE[Voting Engine]
+        RES[Result Calculation]
+    end
+
+    subgraph DevOps
+        CI[GitHub Actions CI]
+        TEST[Contract Tests]
+        BUILD[WASM Build]
+    end
+
+    U --> F
+    F --> W
+    W --> SC
+
+    SC --> DAO
+    SC --> MEM
+    SC --> PROP
+    SC --> VOTE
+    SC --> RES
+
+    SC --> DB
+
+    CI --> TEST
+    TEST --> BUILD
+    BUILD --> SC
+```
