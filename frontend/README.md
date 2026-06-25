@@ -38,13 +38,84 @@ For your 3-minute submission walkthrough, follow these steps to prove the checkl
 
 ---
 
-### Installation & Run
+## 🛠️ Technology Stack & Languages
 
+Votex is built using a modern, decentralized stack split across two main directories:
+
+### 1. Smart Contract (Backend) - `/contract`
+- **Languages**: Rust 🦀
+- **Tech Stack**:
+  - **Soroban SDK (v20.0.0)**: The official SDK for writing smart contracts on the Stellar network.
+  - **Cargo / Rust Toolchain**: For compiling to WebAssembly (`wasm32-unknown-unknown`) and local testing.
+  - **Testing**: Built-in unit tests leveraging `soroban_sdk::testutils` for environment simulation, state validation, and error path testing.
+
+### 2. Frontend Application - `/frontend`
+- **Languages**: JavaScript (ES6+), HTML5, CSS3 (Vanilla + Tailwind CSS)
+- **Tech Stack**:
+  - **Vite (v8.0.4)**: Next-generation frontend tooling for rapid hot module replacement (HMR) and optimized build steps.
+  - **React 19**: A component-based library powering the user interface.
+  - **Tailwind CSS (v4.2.2)**: A utility-first CSS framework styled alongside custom glassmorphism and cyberpunk animations.
+  - **Framer Motion (v12.38.0)**: For responsive micro-interactions and visual states.
+  - **Stellar & Soroban Integration**:
+    - `@stellar/stellar-sdk` (v15.0.1): Core Stellar transaction construction and Horizon API integration.
+    - `@stellar/freighter-api` (v6.0.1): Native integration with the Freighter Wallet browser extension.
+    - `@albedo-link/intent` (v0.13.0): Native integration with the Albedo web/browser wallet.
+  - **Recharts (v3.8.1)**: Interactive charting library to visualize live voting percentages.
+  - **Lucide React (v1.8.0)**: Premium cyberpunk-themed outline iconography.
+
+---
+
+## ⛓️ Smart Contract Details
+
+- **Target Network**: Stellar Testnet
+- **Network Passphrase**: `Test SDF Network ; September 2015`
+- **Soroban RPC URL**: `https://soroban-testnet.stellar.org:443`
+- **Contract ID**: `CBMAFILZK4YTE2ZTDFOVLQZTFXG6SP23DXGGNZV6XV77JIG4UMNV4PUI`
+- **Admin Address**: `GDU34BU5VFLXSZHM5K4D737TYU6XBATENI5RXCI54UKERV6NITMSWJHT`
+
+---
+
+## 🚀 Local Setup & Run Guide
+
+### 1. Prerequisites
+Before getting started, make sure you have the following installed:
+- **Node.js** (v18.x or later) and **npm**
+- **Rust** toolchain (via `rustup`)
+- A Stellar-compatible wallet browser extension (e.g., [Freighter Wallet](https://www.stellar.org/products-and-tools/freighter)) with the network set to **Testnet** and some testnet XLM (obtainable from the [Stellar Friendbot](https://laboratory.stellar.org/#account-creator?network=testnet)).
+
+### 2. Running Smart Contract Tests
+Ensure your Rust smart contract operates perfectly:
 ```bash
-# Enter Frontend
+# Navigate to the contract directory
+cd contract
+
+# Run unit tests
+cargo test
+```
+
+### 3. Running the Frontend Locally
+Configure and launch the interactive React + Vite frontend dashboard:
+```bash
+# Navigate to the frontend directory
 cd frontend
-# Install Dependencies
+```
+
+Inside `frontend/.env`, ensure you have the following configuration:
+```env
+VITE_ADMIN_ADDRESS=GDU34BU5VFLXSZHM5K4D737TYU6XBATENI5RXCI54UKERV6NITMSWJHT
+VITE_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+VITE_RPC_URL=https://soroban-testnet.stellar.org:443
+VITE_CONTRACT_ID=CBMAFILZK4YTE2ZTDFOVLQZTFXG6SP23DXGGNZV6XV77JIG4UMNV4PUI
+```
+
+Install packages and boot the hot-reloading development server:
+```bash
+# Install NPM dependencies
 npm install
-# Start Local Development
+
+# Start the Vite development server
 npm run dev
 ```
+
+Open your browser and navigate to `http://localhost:5173/` (or the port specified in terminal logs).
+
