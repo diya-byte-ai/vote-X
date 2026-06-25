@@ -167,3 +167,5 @@ Community referendums
 Policy approvals
 Shareholder voting
 Budget allocation
+## CI/CD pipeline supporetd
+
