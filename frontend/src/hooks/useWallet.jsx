@@ -9,6 +9,7 @@ export const WalletProvider = ({ children }) => {
   const [address, setAddress] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isWalletReady, setIsWalletReady] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [networkFee, setNetworkFee] = useState(100); // stroops, default low fee
   const [balance, setBalance] = useState(null);
@@ -68,6 +69,8 @@ export const WalletProvider = ({ children }) => {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setIsWalletReady(true);
     }
   }, [fetchBalance]);
 
@@ -131,10 +134,11 @@ export const WalletProvider = ({ children }) => {
   const closeModal = () => setIsModalOpen(false);
 
   return (
-    <WalletContext.Provider value={{ 
-      address, 
-      isAdmin, 
-      isConnecting, 
+    <WalletContext.Provider value={{
+      address,
+      isAdmin,
+      isWalletReady,
+      isConnecting,
       isModalOpen,
       shortAddress,
       networkFee,

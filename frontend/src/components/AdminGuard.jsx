@@ -4,10 +4,11 @@ import { useWallet } from '../hooks/useWallet';
 import toast from 'react-hot-toast';
 
 const AdminGuard = ({ children }) => {
-  const { isAdmin, address } = useWallet();
+  const { isAdmin, isWalletReady, address } = useWallet();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!isWalletReady) return;
     if (!isAdmin) {
       toast.error("Admin access requires the authorized wallet.", {
         style: {
@@ -19,8 +20,9 @@ const AdminGuard = ({ children }) => {
       });
       navigate("/");
     }
-  }, [isAdmin, address, navigate]);
+  }, [isAdmin, isWalletReady, address, navigate]);
 
+  if (!isWalletReady) return null;
   if (!isAdmin) return null;
   return children;
 };
