@@ -51,7 +51,7 @@ export default function CreateProposal() {
         validOptions,
         Number(form.quorum),
         form.category,
-        form.minBalance ? String(form.minBalance * 10000000) : "0" // pass min balance in stroops
+        form.minBalance ? String(Math.round(parseFloat(form.minBalance) * 10000000)) : "0"
       );
       
       setReceipt({ ...res });

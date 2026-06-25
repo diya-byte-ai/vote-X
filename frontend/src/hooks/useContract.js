@@ -211,27 +211,14 @@ export const useContract = () => {
       const account = new StellarSdk.Account(address, accountInfo.sequenceNumber());
       const contract = new StellarSdk.Contract(CONTRACT_ID);
 
-      let baseTx = new StellarSdk.TransactionBuilder(account, { fee: '10000', networkPassphrase: NETWORK_PASSPHRASE })
-        .addOperation(contract.call('vote', 
+      // Pass empty string as tx_hash placeholder — the real Stellar tx hash
+      // is returned by submitAndPoll (res.hash) and stored in the receipt.
+      let tx = new StellarSdk.TransactionBuilder(account, { fee: '10000', networkPassphrase: NETWORK_PASSPHRASE })
+        .addOperation(contract.call('vote',
           new StellarSdk.Address(address).toScVal(),
           StellarSdk.nativeToScVal(proposalId, { type: 'u64' }),
           StellarSdk.nativeToScVal(optionIdx, { type: 'u32' }),
           StellarSdk.nativeToScVal("", { type: 'string' }),
-        ))
-        .setTimeout(30)
-        .build();
-
-      const computedBaseHash = baseTx.hash().toString('hex');
-
-      // Second pass: Inject the generated real tx hash of the underlying payload to fulfill the smart contract parameter
-      // Re-initialize account because the first .build() incremented the sequence number internally!
-      const account2 = new StellarSdk.Account(address, accountInfo.sequenceNumber());
-      let tx = new StellarSdk.TransactionBuilder(account2, { fee: '10000', networkPassphrase: NETWORK_PASSPHRASE })
-        .addOperation(contract.call('vote', 
-          new StellarSdk.Address(address).toScVal(),
-          StellarSdk.nativeToScVal(proposalId, { type: 'u64' }),
-          StellarSdk.nativeToScVal(optionIdx, { type: 'u32' }),
-          StellarSdk.nativeToScVal(computedBaseHash, { type: 'string' }),
         ))
         .setTimeout(30)
         .build();

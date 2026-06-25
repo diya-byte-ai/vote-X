@@ -30,16 +30,22 @@ export default function ProposalDetail() {
   }, [id, getProposal]);
 
   useEffect(() => {
+    let cancelled = false;
+    setAlreadyVotedObj(null);
+
     if (!address) {
-      setAlreadyVotedObj(null);
-      return;
+      setValidatingVote(false);
+      return () => { cancelled = true; };
     }
+
     setValidatingVote(true);
     hasVoted(Number(id)).then(voted => {
-      setAlreadyVotedObj(voted);
+      if (!cancelled) setAlreadyVotedObj(voted);
     }).finally(() => {
-      setValidatingVote(false);
+      if (!cancelled) setValidatingVote(false);
     });
+
+    return () => { cancelled = true; };
   }, [address, id, hasVoted]);
 
   const handleVoteClick = async () => {
