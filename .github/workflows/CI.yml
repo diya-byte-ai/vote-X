@@ -36,3 +36,33 @@ jobs:
       - name: Build contract (release)
         working-directory: contract
         run: cargo build --target wasm32-unknown-unknown --release
+
+  frontend-build:
+    name: Frontend Lint & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: frontend
+        # Reports lint issues without failing the pipeline (pre-existing warnings).
+        # Remove continue-on-error once the lint errors are cleaned up to make it a hard gate.
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+
