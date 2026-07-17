@@ -16,6 +16,9 @@ Demo Link: https://votex-ontc.vercel.app/
 Watch Full Demo on YouTube:
 [youtube](https://youtu.be/4sjdBQs5QQQ)
 
+## FeedBack form : [google form](https://docs.google.com/forms/d/e/1FAIpQLSe-B4efWaPdAbGUGMjsC6efA-RElUZqU89ezGcNSnTR-1S58Q/viewform)
+
+
 ## 📜 Contract Information
 
 | Item | Value |
