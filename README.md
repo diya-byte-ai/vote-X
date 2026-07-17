@@ -1,6 +1,6 @@
 # Votex 
 
-A Decentralized Voting & Governance Platform built on the Stellar Blockchain
+A Decentralized Voting & Governance Platform built on the Stellar Blockchain.
 
 Votex enables secure, transparent, and verifiable voting for elections, surveys, referendums, policy decisions, and budget approvals. Powered by Stellar and Soroban Smart Contracts, every vote is recorded on-chain, ensuring trust, transparency, and tamper-proof governance.
 
