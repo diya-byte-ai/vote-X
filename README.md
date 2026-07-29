@@ -18,10 +18,26 @@ Watch the full demo on YouTube: [youtube](https://youtu.be/4sjdBQs5QQQ)
 
 ## 📝 Feedback
 
-- **Feedback Form:** [google form](https://docs.google.com/forms/d/e/1FAIpQLSe-B4efWaPdAbGUGMjsC6efA-RElUZqU89ezGcNSnTR-1S58Q/viewform)
-- **Feedback Sheet:** [google sheet](https://docs.google.com/spreadsheets/d/1krPuOkLOxf-UMphvMwni4La_BzpAXSM18M5N4_xdPrE/edit?usp=sharing)
+- **Feedback Form:** [google form](https://docs.google.com/forms/d/e/1FAIpQLScnyBsMbnkr_3DwYCby6yVMwGWV0I0GcNUf2vGqIUEx6Tis0g/viewform)
+- **Feedback Sheet:** [google sheet](https://docs.google.com/spreadsheets/d/1TpqnT-X-EdcRrufM_3DlYgDyYXKQTDA_kxg_HRiCQI0/edit?usp=sharing)
 
 ---
+## User Feedback: 
+| Name | Gmail | Wallet Address | Feedback |
+|------|-------|----------------|----------|
+| Gour Majumdar | majumdargour6@gmail.com | GCXM5UNIHALRP2HOCWFSGBLATSFFQLB5YZWCLIICKKELR3E7OCHZSLMF | "A proposal said Minimum Balance Required: 50000000 XLM. The admin only set 5 XLM. The number is shown in the wrong unit and it scared me off voting." |
+| Pabon Dey | pabondey783@gmail.com | GCHKRVXHM3EECBD2KXZQYIMPIU4VTZHYYDJZKGAZO2VXPMHLJA275FOP | "I voted on my phone, then opened My Voting History on my laptop with the same wallet — it said 'You haven't voted yet.' My votes are on-chain; the page should read them from the contract, not just the browser." |
+| Rahul Roy | rahulroy769@gmail.com | GB4EU73SY2J7KJAMTSZCFUER7XKMRUFR3IE3NWDNSFO754EIWUH5ITAB | "A friend sent me his transaction hash to verify his vote. I pasted it into the Verify page and got 'Record Not Found.' It only seems to find my own votes, so it isn't really public verification." |
+| Dipa Das | dipadas62435@gmail.com | GDXACHTZWDCNWWUJZ6KQHOW3T2G34CQXNSMMIZJSZSOQUISUJBJC2OLT | "The countdown had already ended but the Cast Vote button was still active. I signed in Freighter, paid the fee, and only then it failed. The button should be disabled once voting closes." |
+| Pratima Rudra | pratimarudra666@gmail.com | GAQFPTYZEI5RCBURZ7OAMGJYO6NHS7VYWZTNNYEPUOKU7QK5FELPOIYD | "Every failure shows the same message: 'Transaction failed or rejected.' I couldn't tell whether I had already voted, didn't have enough XLM, or just cancelled in the wallet." |
+| Bijay Shanjar | bijayshankar2321@gmail.com | GAYUFZJBWTK3T5ZX47DILF43QUGPYFNIPBVTLYLF3CYVJVF54MCSS3G3| "Once it got stuck on 'Submitting to Chain...' forever. The spinner never stopped and I had to reload the page — I wasn't sure if my vote went through or not." |
+| Moumita Das | moumitadas547@gmail.com | GDU34BU5VFLXSZHM5K4D737TYU6XBATENI5RXCI54UKERV6NITMSWJHT | "The confirm popup said estimated fee ~2,000 stroops but the receipt after signing said 10,000 stroops. The preview should match what I'm actually charged." |
+| Prisha Dey | prishadey578@gmail.com | GBHPK2DOERC3I4A3HEJEXSA3SCYD4N7RX74JFXOKJT74S6ICQ4TGX4YH | "There's no search or filter on the Active Proposals page. With a screen full of proposals I had to scroll and read every card to find the election I wanted." |
+| Lipika Dey | dlipika820@gmail.com | GBQLFIT7UWCURWEDBR5JPCQPFIFYJ23AKIX24P6MOAAZ3AIDTSNE24FY| "Two options had the same number of votes but the page still declared one of them the Winner with a green bar. A tie should be shown as a tie, not a win." |
+| Arpita | dasarpita398@gmail.com | GCZG5HJBIDSOGZVXJMFNJTIQ5HAYR2SQGRUYT5GRMG6BHT2PNLPPSMIQ | "After a lot of test proposals and votes the app started failing to load proposals on testnet. Feels like the contract keeps everything in one storage entry that will hit its limit." |
+| Riju Dey | deyriju724@gmail.com | GBEPCGCJHUDNPCIF53SHCQKDZHTCK66JBTT6F2B2VU5NNTD57SIYFC3U | "Good. I don't face any problem." |
+
+
 
 ## 📜 Contract Information
 
