@@ -6,6 +6,7 @@ import { Loader2, ArrowLeft, CheckCircle2, Wallet, ExternalLink, Copy, Hexagon, 
 import { motion, AnimatePresence } from 'framer-motion';
 import CountdownTimer from '../components/CountdownTimer';
 import { formatXLM } from '../utils/format';
+import { parseTxError } from '../utils/errors';
 import toast from 'react-hot-toast';
 
 export default function ProposalDetail() {
@@ -86,7 +87,7 @@ export default function ProposalDetail() {
       toast.success("Vote recorded on-chain successfully!");
     } catch (e) {
       setVoteState('error');
-      toast.error("Transaction failed or rejected");
+      toast.error(parseTxError(e), { duration: 6000 });
       setTimeout(() => setVoteState('idle'), 2000);
     }
   };

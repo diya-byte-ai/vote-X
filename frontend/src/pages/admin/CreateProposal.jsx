@@ -3,6 +3,7 @@ import { useContract } from '../../hooks/useContract';
 import { useWallet } from '../../hooks/useWallet';
 import { Loader2, Plus, Trash2, ShieldAlert, CheckCircle2, Copy, Hexagon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { parseTxError } from '../../utils/errors';
 
 export default function CreateProposal() {
   const { createProposal } = useContract();
@@ -59,7 +60,7 @@ export default function CreateProposal() {
       setOptions(['', '']);
       setShowSummary(false);
     } catch (err) {
-      setErrorStatus("Failed to submit to chain: " + (err.message || String(err)));
+      setErrorStatus(parseTxError(err));
       setShowSummary(false);
     } finally {
       setLoading(false);

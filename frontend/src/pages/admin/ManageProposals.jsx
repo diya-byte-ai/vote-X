@@ -3,6 +3,7 @@ import { useContract } from '../../hooks/useContract';
 import { Loader2, Settings, Lock, ShieldAlert, Hexagon, CheckCircle2, Copy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { parseTxError } from '../../utils/errors';
 
 export default function ManageProposals() {
   const { getActiveProposals, closeProposal } = useContract();
@@ -45,7 +46,7 @@ export default function ManageProposals() {
       // Refresh the list after brief delay
       setTimeout(fetchProposals, 1500);
     } catch (err) {
-      setErrorStatus("Failed to submit to chain: " + (err.message || String(err)));
+      setErrorStatus(parseTxError(err));
       setClosingId(null);
     } finally {
       setLoadingClose(false);
