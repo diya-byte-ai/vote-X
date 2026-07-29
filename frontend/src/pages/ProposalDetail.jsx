@@ -290,10 +290,12 @@ export default function ProposalDetail() {
                     </div>
                     
                     <div className="space-y-1">
-                      <div className="text-xs text-slate-500 uppercase tracking-wider">💸 Network Fee Paid</div>
+                      <div className="text-xs text-slate-500 uppercase tracking-wider">
+                        💸 {receipt.feeIsActual ? 'Network Fee Charged' : 'Max Network Fee'}
+                      </div>
                       <div className="text-emerald-300 font-medium bg-slate-800/50 p-2 rounded border border-emerald-900/50 flex items-center gap-2">
                         {receipt.fee} stroops
-                        <span className="text-emerald-500/70 text-sm">({(receipt.fee / 10000000).toFixed(7)} XLM)</span>
+                        <span className="text-emerald-500/70 text-sm">({formatXLM(receipt.fee)} XLM)</span>
                       </div>
                     </div>
 

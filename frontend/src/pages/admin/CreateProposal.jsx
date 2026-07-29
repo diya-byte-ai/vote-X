@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useContract } from '../../hooks/useContract';
+import { useContract, TX_MAX_FEE_STROOPS } from '../../hooks/useContract';
+import { formatXLM } from '../../utils/format';
 import { useWallet } from '../../hooks/useWallet';
 import { Loader2, Plus, Trash2, ShieldAlert, CheckCircle2, Copy, Hexagon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -136,7 +137,9 @@ export default function CreateProposal() {
                   </div>
                 </div>
                 <div className="flex justify-between items-center text-sm border-t border-slate-800 pt-3">
-                  <span className="text-slate-500">Fee Paid: <span className="text-slate-300 font-mono">{receipt.fee} stroops</span></span>
+                  <span className="text-slate-500">
+                    {receipt.feeIsActual ? 'Fee Charged' : 'Max Fee'}: <span className="text-slate-300 font-mono">{receipt.fee} stroops</span>
+                  </span>
                   <span className="text-slate-500 text-xs">Timestamp: {new Date(receipt.timestamp).toLocaleString()}</span>
                 </div>
               </div>
@@ -328,8 +331,11 @@ export default function CreateProposal() {
                     <div className="text-white text-sm font-medium">{form.deadlineDays}d {form.deadlineMinutes}m</div>
                   </div>
                   <div>
-                    <div className="text-xs text-slate-500 mb-1">Estimated Fee</div>
-                    <div className="text-slate-300 font-mono text-sm">~2,000 stroops</div>
+                    <div className="text-xs text-slate-500 mb-1">Max Fee</div>
+                    <div className="text-slate-300 font-mono text-sm">
+                      {TX_MAX_FEE_STROOPS.toLocaleString()} stroops
+                      <span className="text-slate-500"> ({formatXLM(TX_MAX_FEE_STROOPS)} XLM)</span>
+                    </div>
                   </div>
                 </div>
                 <div>

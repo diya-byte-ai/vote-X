@@ -13,6 +13,10 @@ const CONTRACT_ID = import.meta.env.VITE_CONTRACT_ID || '';
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 60000;
 
+// The maximum fee bid on every contract transaction. The network usually
+// charges far less; the amount actually charged is read back off the result.
+export const TX_MAX_FEE_STROOPS = 10000;
+
 export const useContract = () => {
   const { address, setNetworkFee, activeWallet } = useWallet();
   const [loading, setLoading] = useState(false);
@@ -112,7 +116,9 @@ export const useContract = () => {
     if (status !== "SUCCESS") {
       throw new Error(`Transaction failed on-chain with status: ${status}`);
     }
-    return res;
+    // feeCharged is what the network actually took, which is what a receipt
+    // should report; it is nearly always well under the max fee bid.
+    return { hash: res.hash, feeCharged: extractFeeCharged(txResponse) };
   };
 
   const mapProposal = p => ({
@@ -227,7 +233,7 @@ export const useContract = () => {
       
       const minXlm = minXlmStr ? BigInt(minXlmStr) : BigInt(0);
 
-      let tx = new StellarSdk.TransactionBuilder(account, { fee: '10000', networkPassphrase: NETWORK_PASSPHRASE })
+      let tx = new StellarSdk.TransactionBuilder(account, { fee: String(TX_MAX_FEE_STROOPS), networkPassphrase: NETWORK_PASSPHRASE })
         .addOperation(contract.call('create_proposal', 
           StellarSdk.nativeToScVal(title, { type: 'string' }),
           StellarSdk.nativeToScVal(desc, { type: 'string' }),
@@ -264,11 +270,13 @@ export const useContract = () => {
 
       const signedTx = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
       
-      const res = await submitAndPoll(server, signedTx);
-      setNetworkFee?.(10000);
+      const { hash, feeCharged } = await submitAndPoll(server, signedTx);
+      const fee = feeCharged ?? TX_MAX_FEE_STROOPS;
+      setNetworkFee?.(fee);
       return {
-        txHash: res.hash,
-        fee: 10000,
+        txHash: hash,
+        fee,
+        feeIsActual: feeCharged !== null,
         timestamp: Date.now()
       };
     } catch (err) {
@@ -289,8 +297,8 @@ export const useContract = () => {
       const contract = new StellarSdk.Contract(CONTRACT_ID);
 
       // Pass empty string as tx_hash placeholder — the real Stellar tx hash
-      // is returned by submitAndPoll (res.hash) and stored in the receipt.
-      let tx = new StellarSdk.TransactionBuilder(account, { fee: '10000', networkPassphrase: NETWORK_PASSPHRASE })
+      // is returned by submitAndPoll and stored in the receipt.
+      let tx = new StellarSdk.TransactionBuilder(account, { fee: String(TX_MAX_FEE_STROOPS), networkPassphrase: NETWORK_PASSPHRASE })
         .addOperation(contract.call('vote',
           new StellarSdk.Address(address).toScVal(),
           StellarSdk.nativeToScVal(proposalId, { type: 'u64' }),
@@ -323,12 +331,14 @@ export const useContract = () => {
 
       const signedTx = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
       
-      const res = await submitAndPoll(server, signedTx);
-      setNetworkFee?.(10000);
-      
+      const { hash, feeCharged } = await submitAndPoll(server, signedTx);
+      const fee = feeCharged ?? TX_MAX_FEE_STROOPS;
+      setNetworkFee?.(fee);
+
       const receipt = {
-        txHash: res.hash,
-        fee: 10000,
+        txHash: hash,
+        fee,
+        feeIsActual: feeCharged !== null,
         timestamp: Date.now(),
         choice: optionText || String(optionIdx)
       };
@@ -362,7 +372,7 @@ export const useContract = () => {
       const account = new StellarSdk.Account(address, accountInfo.sequenceNumber());
       const contract = new StellarSdk.Contract(CONTRACT_ID);
 
-      let tx = new StellarSdk.TransactionBuilder(account, { fee: '10000', networkPassphrase: NETWORK_PASSPHRASE })
+      let tx = new StellarSdk.TransactionBuilder(account, { fee: String(TX_MAX_FEE_STROOPS), networkPassphrase: NETWORK_PASSPHRASE })
         .addOperation(contract.call('close_proposal', 
           StellarSdk.nativeToScVal(proposalId, { type: 'u64' })
         ))
@@ -392,11 +402,13 @@ export const useContract = () => {
 
       const signedTx = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
       
-      const res = await submitAndPoll(server, signedTx);
-      setNetworkFee?.(10000);
+      const { hash, feeCharged } = await submitAndPoll(server, signedTx);
+      const fee = feeCharged ?? TX_MAX_FEE_STROOPS;
+      setNetworkFee?.(fee);
       return {
-        txHash: res.hash,
-        fee: 10000,
+        txHash: hash,
+        fee,
+        feeIsActual: feeCharged !== null,
         timestamp: Date.now()
       };
     } catch (err) {
@@ -414,7 +426,7 @@ export const useContract = () => {
       const server = getServer();
       const account = await server.getAccount(address);
       
-      let tx = new StellarSdk.TransactionBuilder(account, { fee: '10000', networkPassphrase: NETWORK_PASSPHRASE })
+      let tx = new StellarSdk.TransactionBuilder(account, { fee: String(TX_MAX_FEE_STROOPS), networkPassphrase: NETWORK_PASSPHRASE })
         .addOperation(StellarSdk.Operation.payment({
           destination: destinationAddress,
           asset: StellarSdk.Asset.native(),
@@ -437,9 +449,9 @@ export const useContract = () => {
       }
 
       const signedTx = StellarSdk.TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
-      const res = await submitAndPoll(server, signedTx);
-      
-      return { txHash: res.hash };
+      const { hash, feeCharged } = await submitAndPoll(server, signedTx);
+
+      return { txHash: hash, fee: feeCharged ?? TX_MAX_FEE_STROOPS };
     } catch (err) {
       console.error("Donate Error:", err);
       // Ensure specific errors bubble up for the UI to display, handling 3 distinct error types required by Level 2.
