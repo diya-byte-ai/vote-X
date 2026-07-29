@@ -36,7 +36,24 @@ Watch the full demo on YouTube: [youtube](https://youtu.be/4sjdBQs5QQQ)
 | Lipika Dey | dlipika820@gmail.com | GBQLFIT7UWCURWEDBR5JPCQPFIFYJ23AKIX24P6MOAAZ3AIDTSNE24FY| "Two options had the same number of votes but the page still declared one of them the Winner with a green bar. A tie should be shown as a tie, not a win." |
 | Arpita | dasarpita398@gmail.com | GCZG5HJBIDSOGZVXJMFNJTIQ5HAYR2SQGRUYT5GRMG6BHT2PNLPPSMIQ | "After a lot of test proposals and votes the app started failing to load proposals on testnet. Feels like the contract keeps everything in one storage entry that will hit its limit." |
 | Riju Dey | deyriju724@gmail.com | GBEPCGCJHUDNPCIF53SHCQKDZHTCK66JBTT6F2B2VU5NNTD57SIYFC3U | "Good. I don't face any problem." |
+----
 
+## Feedback implementation: 
+## Feedback Implementation
+
+| User ID | Name | Email | Wallet Address | Feedback Summary | Improvement Made | Git Commit ID |
+|---------|------|-------|----------------|------------------|------------------|---------------|
+| U01 | Gour Majumdar | majumdargour6@gmail.com | GCXM5UNIHALRP2HOCWFSGBLATSFFQLB5YZWCLIICKKELR3E7OCHZSLMF | Minimum balance displayed as **50,000,000 XLM** instead of **5 XLM**. | Fixed minimum balance display by converting stroops to XLM before rendering. | `c3337c9` |
+| U02 | Pabon Dey | pabondey783@gmail.com | GCHKRVXHM3EECBD2KXZQYIMPIU4VTZHYYDJZKGAZO2VXPMHLJA275FOP | Vote history disappeared when accessed from another device. | Read voting history directly from the smart contract instead of browser localStorage. | `6dd21cb` |
+| U03 | Rahul Roy | rahulroy769@gmail.com | GB4EU73SY2J7KJAMTSZCFUER7XKMRUFR3IE3NWDNSFO754EIWUH5ITAB | Verify page could not verify another user's transaction hash. | Verification now checks votes against the blockchain instead of browser cache. | `c5b04de` |
+| U04 | Dipa Das | dipadas62435@gmail.com | GDXACHTZWDCNWWUJZ6KQHOW3T2G34CQXNSMMIZJSZSOQUISUJBJC2OLT | Cast Vote button stayed active after proposal deadline. | Disabled voting UI automatically after proposal closes or deadline passes. | `49d5d70` |
+| U05 | Pratima Rudra | pratimarudra666@gmail.com | GAQFPTYZEI5RCBURZ7OAMGJYO6NHS7VYWZTNNYEPUOKU7QK5FELPOIYD | Generic transaction error gave no useful information. | Added detailed transaction error reporting with actual contract failure reason. | `dfa6bca` |
+| U06 | Bijay Shanjar | bijayshankar2321@gmail.com | GAYUFZJBWTK3T5ZX47DILF43QUGPYFNIPBVTLYLF3CYVJVF54MCSS3G3 | Transaction remained on "Submitting to Chain..." indefinitely. | Added timeout and bounded polling for transaction confirmation. | `a539f5e` |
+| U07 | Moumita Das | moumitadas547@gmail.com | GDU34BU5VFLXSZHM5K4D737TYU6XBATENI5RXCI54UKERV6NITMSWJHT | Estimated fee differed from actual charged fee. | Display actual fee charged instead of maximum fee bid. | `23ecca7` |
+| U08 | Prisha Dey | prishadey578@gmail.com | GBHPK2DOERC3I4A3HEJEXSA3SCYD4N7RX74JFXOKJT74S6ICQ4TGX4YH | Difficult to locate proposals without search or filters. | Added search, category filter, status filter, and sorting to Active Proposals. | `b8cc4b1` |
+| U09 | Lipika Dey | dlipika820@gmail.com | GBQLFIT7UWCURWEDBR5JPCQPFIFYJ23AKIX24P6MOAAZ3AIDTSNE24FY | Tie between options incorrectly declared one winner. | Added tie detection and proper tie result handling. | `00bf332` |
+| U10 | Arpita | dasarpita398@gmail.com | GCZG5HJBIDSOGZVXJMFNJTIQ5HAYR2SQGRUYT5GRMG6BHT2PNLPPSMIQ | Proposal loading failed after many proposals and votes due to storage limitations. | Moved proposals and vote records to persistent storage for better scalability. | `9e61666` |
+| U11 | Riju Dey | deyriju724@gmail.com | GBEPCGCJHUDNPCIF53SHCQKDZHTCK66JBTT6F2B2VU5NNTD57SIYFC3U | No issues reported during testing. | Conducted onboarding feedback session and documented successful user experience. | `a916a73` |
 
 
 ## 📜 Contract Information
