@@ -15,10 +15,10 @@
               "function_name": "create_proposal",
               "args": [
                 {
-                  "string": "Treasury Allocation"
+                  "string": "Unvoted"
                 },
                 {
-                  "string": "Spend 10,000 XLM on Marketing"
+                  "string": "Nobody voted"
                 },
                 {
                   "u64": 0
@@ -29,18 +29,18 @@
                 {
                   "vec": [
                     {
-                      "string": "Yes"
+                      "string": "A"
                     },
                     {
-                      "string": "No"
+                      "string": "B"
                     }
                   ]
                 },
                 {
-                  "u64": 100
+                  "u64": 0
                 },
                 {
-                  "string": "Finance"
+                  "string": "General"
                 },
                 {
                   "i128": {
@@ -109,7 +109,7 @@
                         "symbol": "category"
                       },
                       "val": {
-                        "string": "Finance"
+                        "string": "General"
                       }
                     },
                     {
@@ -141,7 +141,7 @@
                         "symbol": "description"
                       },
                       "val": {
-                        "string": "Spend 10,000 XLM on Marketing"
+                        "string": "Nobody voted"
                       }
                     },
                     {
@@ -178,10 +178,10 @@
                       "val": {
                         "vec": [
                           {
-                            "string": "Yes"
+                            "string": "A"
                           },
                           {
-                            "string": "No"
+                            "string": "B"
                           }
                         ]
                       }
@@ -191,7 +191,7 @@
                         "symbol": "quorum"
                       },
                       "val": {
-                        "u64": 100
+                        "u64": 0
                       }
                     },
                     {
@@ -207,7 +207,7 @@
                         "symbol": "title"
                       },
                       "val": {
-                        "string": "Treasury Allocation"
+                        "string": "Unvoted"
                       }
                     },
                     {
@@ -443,10 +443,10 @@
             "data": {
               "vec": [
                 {
-                  "string": "Treasury Allocation"
+                  "string": "Unvoted"
                 },
                 {
-                  "string": "Spend 10,000 XLM on Marketing"
+                  "string": "Nobody voted"
                 },
                 {
                   "u64": 0
@@ -457,18 +457,18 @@
                 {
                   "vec": [
                     {
-                      "string": "Yes"
+                      "string": "A"
                     },
                     {
-                      "string": "No"
+                      "string": "B"
                     }
                   ]
                 },
                 {
-                  "u64": 100
+                  "u64": 0
                 },
                 {
-                  "string": "Finance"
+                  "string": "General"
                 },
                 {
                   "i128": {
@@ -521,10 +521,12 @@
                 "bytes": "0000000000000000000000000000000000000000000000000000000000000001"
               },
               {
-                "symbol": "get_stats"
+                "symbol": "get_results"
               }
             ],
-            "data": "void"
+            "data": {
+              "u64": 0
+            }
           }
         }
       },
@@ -542,16 +544,32 @@
                 "symbol": "fn_return"
               },
               {
-                "symbol": "get_stats"
+                "symbol": "get_results"
               }
             ],
             "data": {
               "vec": [
                 {
-                  "u64": 1
+                  "u32": 0
+                },
+                {
+                  "vec": [
+                    {
+                      "u64": 0
+                    },
+                    {
+                      "u64": 0
+                    }
+                  ]
                 },
                 {
                   "u64": 0
+                },
+                {
+                  "bool": true
+                },
+                {
+                  "bool": false
                 }
               ]
             }

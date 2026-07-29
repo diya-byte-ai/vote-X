@@ -62,9 +62,36 @@ pub enum DataKey {
     Vote(Address, u64), // voter + proposal_id
 }
 
+// ~5s per ledger on Stellar.
+const DAY_IN_LEDGERS: u32 = 17280;
+// Proposals and votes are long-lived records, so they are held well beyond a
+// typical voting window and renewed whenever they are written.
+const ENTRY_LIFETIME: u32 = 90 * DAY_IN_LEDGERS;
+const ENTRY_THRESHOLD: u32 = ENTRY_LIFETIME - 30 * DAY_IN_LEDGERS;
+const INSTANCE_LIFETIME: u32 = 30 * DAY_IN_LEDGERS;
+const INSTANCE_THRESHOLD: u32 = INSTANCE_LIFETIME - 7 * DAY_IN_LEDGERS;
+
 fn require_admin(env: &Env) {
     let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
     admin.require_auth();
+}
+
+fn extend_instance(env: &Env) {
+    env.storage().instance().extend_ttl(INSTANCE_THRESHOLD, INSTANCE_LIFETIME);
+}
+
+// Proposals and vote records live in persistent storage: instance storage is
+// a single bounded entry sharing one TTL, so keeping every proposal and every
+// vote in it would cap how many the contract can hold and would archive all
+// of them at once. Persistent entries are independent and renewed on write.
+fn save_proposal(env: &Env, proposal: &Proposal) {
+    let key = DataKey::Proposal(proposal.id);
+    env.storage().persistent().set(&key, proposal);
+    env.storage().persistent().extend_ttl(&key, ENTRY_THRESHOLD, ENTRY_LIFETIME);
+}
+
+fn load_proposal(env: &Env, id: u64) -> Option<Proposal> {
+    env.storage().persistent().get::<DataKey, Proposal>(&DataKey::Proposal(id))
 }
 
 #[contractimpl]
@@ -76,6 +103,7 @@ impl VoxChainVotingContract {
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::NativeToken, &native_token);
         env.storage().instance().set(&DataKey::ProposalCount, &0u64);
+        extend_instance(&env);
     }
 
     pub fn create_proposal(
@@ -121,21 +149,23 @@ impl VoxChainVotingContract {
             min_balance,
         };
 
-        env.storage().instance().set(&DataKey::Proposal(id), &proposal);
+        save_proposal(&env, &proposal);
         env.storage().instance().set(&DataKey::ProposalCount, &proposal_count);
+        extend_instance(&env);
         id
     }
 
     pub fn close_proposal(env: Env, proposal_id: u64) {
         require_admin(&env);
 
-        if let Some(mut proposal) = env.storage().instance().get::<_, Proposal>(&DataKey::Proposal(proposal_id)) {
+        if let Some(mut proposal) = load_proposal(&env, proposal_id) {
             let cur_time = env.ledger().timestamp();
             if cur_time < proposal.deadline {
                 panic_with_error!(&env, Error::CannotCloseBeforeDeadline);
             }
             proposal.is_closed = true;
-            env.storage().instance().set(&DataKey::Proposal(proposal_id), &proposal);
+            save_proposal(&env, &proposal);
+            extend_instance(&env);
         } else {
             panic_with_error!(&env, Error::ProposalNotFound);
         }
@@ -144,6 +174,7 @@ impl VoxChainVotingContract {
     pub fn transfer_admin(env: Env, new_admin: Address) {
         require_admin(&env);
         env.storage().instance().set(&DataKey::Admin, &new_admin);
+        extend_instance(&env);
     }
 
     pub fn vote(env: Env, voter: Address, proposal_id: u64, option_idx: u32, tx_hash: String) {
@@ -154,7 +185,7 @@ impl VoxChainVotingContract {
             panic_with_error!(&env, Error::AdminCannotVote);
         }
 
-        if let Some(mut proposal) = env.storage().instance().get::<_, Proposal>(&DataKey::Proposal(proposal_id)) {
+        if let Some(mut proposal) = load_proposal(&env, proposal_id) {
             let cur_time = env.ledger().timestamp();
             if cur_time < proposal.start_time {
                 panic_with_error!(&env, Error::NotStarted);
@@ -167,7 +198,7 @@ impl VoxChainVotingContract {
             }
             
             let vote_key = DataKey::Vote(voter.clone(), proposal_id);
-            if env.storage().instance().has(&vote_key) {
+            if env.storage().persistent().has(&vote_key) {
                 panic_with_error!(&env, Error::AlreadyVoted);
             }
 
@@ -196,22 +227,27 @@ impl VoxChainVotingContract {
                 tx_hash,
             };
 
-            env.storage().instance().set(&vote_key, &record);
-            env.storage().instance().set(&DataKey::Proposal(proposal_id), &proposal);
+            env.storage().persistent().set(&vote_key, &record);
+            env.storage().persistent().extend_ttl(&vote_key, ENTRY_THRESHOLD, ENTRY_LIFETIME);
+            save_proposal(&env, &proposal);
+            extend_instance(&env);
         } else {
             panic_with_error!(&env, Error::ProposalNotFound);
         }
     }
 
     pub fn get_proposal(env: Env, id: u64) -> Proposal {
-        env.storage().instance().get(&DataKey::Proposal(id)).unwrap()
+        match load_proposal(&env, id) {
+            Some(p) => p,
+            None => panic_with_error!(&env, Error::ProposalNotFound),
+        }
     }
 
     pub fn get_all_proposals(env: Env) -> Vec<Proposal> {
         let count: u64 = env.storage().instance().get(&DataKey::ProposalCount).unwrap_or(0);
         let mut proposals = Vec::new(&env);
         for i in 0..count {
-            if let Some(p) = env.storage().instance().get::<_, Proposal>(&DataKey::Proposal(i)) {
+            if let Some(p) = load_proposal(&env, i) {
                 proposals.push_back(p);
             }
         }
@@ -243,12 +279,12 @@ impl VoxChainVotingContract {
     }
 
     pub fn has_voted(env: Env, voter: Address, proposal_id: u64) -> bool {
-        env.storage().instance().has(&DataKey::Vote(voter, proposal_id))
+        env.storage().persistent().has(&DataKey::Vote(voter, proposal_id))
     }
 
     pub fn get_vote(env: Env, voter: Address, proposal_id: u64) -> Option<u32> {
         let key = DataKey::Vote(voter, proposal_id);
-        if let Some(record) = env.storage().instance().get::<_, VoteRecord>(&key) {
+        if let Some(record) = env.storage().persistent().get::<_, VoteRecord>(&key) {
             Some(record.option_idx)
         } else {
             None
@@ -260,7 +296,7 @@ impl VoxChainVotingContract {
         let mut history = Vec::new(&env);
         for i in 0..count {
             let vote_key = DataKey::Vote(voter.clone(), i);
-            if let Some(record) = env.storage().instance().get::<_, VoteRecord>(&vote_key) {
+            if let Some(record) = env.storage().persistent().get::<_, VoteRecord>(&vote_key) {
                 history.push_back(record);
             }
         }
@@ -271,7 +307,10 @@ impl VoxChainVotingContract {
     // When is_tie is true the winner_idx is only the first option holding the
     // top count and must not be presented as the outcome.
     pub fn get_results(env: Env, proposal_id: u64) -> (u32, Vec<u64>, u64, bool, bool) {
-        let proposal: Proposal = env.storage().instance().get(&DataKey::Proposal(proposal_id)).unwrap();
+        let proposal: Proposal = match load_proposal(&env, proposal_id) {
+            Some(p) => p,
+            None => panic_with_error!(&env, Error::ProposalNotFound),
+        };
         let mut winner_idx = 0;
         let mut max_votes = 0;
         let mut top_count = 0u32;

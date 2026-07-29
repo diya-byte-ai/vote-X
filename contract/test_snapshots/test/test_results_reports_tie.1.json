@@ -1,6 +1,6 @@
 {
   "generators": {
-    "address": 4,
+    "address": 5,
     "nonce": 0
   },
   "auth": [
@@ -15,10 +15,10 @@
               "function_name": "create_proposal",
               "args": [
                 {
-                  "string": "Test Prop"
+                  "string": "Tied Vote"
                 },
                 {
-                  "string": "Test Desc"
+                  "string": "One vote each"
                 },
                 {
                   "u64": 0
@@ -74,7 +74,7 @@
                   "u32": 0
                 },
                 {
-                  "string": "hash123"
+                  "string": "hash"
                 }
               ]
             }
@@ -84,6 +84,34 @@
       ]
     ],
     [],
+    [
+      [
+        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
+        {
+          "function": {
+            "contract_fn": {
+              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+              "function_name": "vote",
+              "args": [
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
+                },
+                {
+                  "u64": 0
+                },
+                {
+                  "u32": 1
+                },
+                {
+                  "string": "hash"
+                }
+              ]
+            }
+          },
+          "sub_invocations": []
+        }
+      ]
+    ],
     []
   ],
   "ledger": {
@@ -170,7 +198,7 @@
                         "symbol": "description"
                       },
                       "val": {
-                        "string": "Test Desc"
+                        "string": "One vote each"
                       }
                     },
                     {
@@ -236,7 +264,7 @@
                         "symbol": "title"
                       },
                       "val": {
-                        "string": "Test Prop"
+                        "string": "Tied Vote"
                       }
                     },
                     {
@@ -244,7 +272,7 @@
                         "symbol": "total_votes"
                       },
                       "val": {
-                        "u64": 1
+                        "u64": 2
                       }
                     },
                     {
@@ -257,7 +285,7 @@
                             "u64": 1
                           },
                           {
-                            "u64": 0
+                            "u64": 1
                           }
                         ]
                       }
@@ -335,7 +363,7 @@
                         "symbol": "tx_hash"
                       },
                       "val": {
-                        "string": "hash123"
+                        "string": "hash"
                       }
                     },
                     {
@@ -352,6 +380,98 @@
                       },
                       "val": {
                         "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "ext": "v0"
+          },
+          1555200
+        ]
+      ],
+      [
+        {
+          "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+            "key": {
+              "vec": [
+                {
+                  "symbol": "Vote"
+                },
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
+                },
+                {
+                  "u64": 0
+                }
+              ]
+            },
+            "durability": "persistent"
+          }
+        },
+        [
+          {
+            "last_modified_ledger_seq": 0,
+            "data": {
+              "contract_data": {
+                "ext": "v0",
+                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+                "key": {
+                  "vec": [
+                    {
+                      "symbol": "Vote"
+                    },
+                    {
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
+                    },
+                    {
+                      "u64": 0
+                    }
+                  ]
+                },
+                "durability": "persistent",
+                "val": {
+                  "map": [
+                    {
+                      "key": {
+                        "symbol": "option_idx"
+                      },
+                      "val": {
+                        "u32": 1
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "proposal_id"
+                      },
+                      "val": {
+                        "u64": 0
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "tx_hash"
+                      },
+                      "val": {
+                        "string": "hash"
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "voted_at"
+                      },
+                      "val": {
+                        "u64": 0
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "voter"
+                      },
+                      "val": {
+                        "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
                       }
                     }
                   ]
@@ -500,6 +620,39 @@
       ],
       [
         {
+          "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
+            "key": {
+              "ledger_key_nonce": {
+                "nonce": 1033654523790656264
+              }
+            },
+            "durability": "temporary"
+          }
+        },
+        [
+          {
+            "last_modified_ledger_seq": 0,
+            "data": {
+              "contract_data": {
+                "ext": "v0",
+                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
+                "key": {
+                  "ledger_key_nonce": {
+                    "nonce": 1033654523790656264
+                  }
+                },
+                "durability": "temporary",
+                "val": "void"
+              }
+            },
+            "ext": "v0"
+          },
+          15
+        ]
+      ],
+      [
+        {
           "contract_code": {
             "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
           }
@@ -597,10 +750,10 @@
             "data": {
               "vec": [
                 {
-                  "string": "Test Prop"
+                  "string": "Tied Vote"
                 },
                 {
-                  "string": "Test Desc"
+                  "string": "One vote each"
                 },
                 {
                   "u64": 0
@@ -690,7 +843,7 @@
                   "u32": 0
                 },
                 {
-                  "string": "hash123"
+                  "string": "hash"
                 }
               ]
             }
@@ -735,10 +888,12 @@
                 "bytes": "0000000000000000000000000000000000000000000000000000000000000001"
               },
               {
-                "symbol": "get_stats"
+                "symbol": "get_results"
               }
             ],
-            "data": "void"
+            "data": {
+              "u64": 0
+            }
           }
         }
       },
@@ -756,16 +911,32 @@
                 "symbol": "fn_return"
               },
               {
-                "symbol": "get_stats"
+                "symbol": "get_results"
               }
             ],
             "data": {
               "vec": [
                 {
-                  "u64": 1
+                  "u32": 0
+                },
+                {
+                  "vec": [
+                    {
+                      "u64": 1
+                    },
+                    {
+                      "u64": 0
+                    }
+                  ]
                 },
                 {
                   "u64": 1
+                },
+                {
+                  "bool": true
+                },
+                {
+                  "bool": false
                 }
               ]
             }
@@ -789,16 +960,22 @@
                 "bytes": "0000000000000000000000000000000000000000000000000000000000000001"
               },
               {
-                "symbol": "has_voted"
+                "symbol": "vote"
               }
             ],
             "data": {
               "vec": [
                 {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4"
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
                 },
                 {
                   "u64": 0
+                },
+                {
+                  "u32": 1
+                },
+                {
+                  "string": "hash"
                 }
               ]
             }
@@ -819,11 +996,81 @@
                 "symbol": "fn_return"
               },
               {
-                "symbol": "has_voted"
+                "symbol": "vote"
+              }
+            ],
+            "data": "void"
+          }
+        }
+      },
+      "failed_call": false
+    },
+    {
+      "event": {
+        "ext": "v0",
+        "contract_id": null,
+        "type_": "diagnostic",
+        "body": {
+          "v0": {
+            "topics": [
+              {
+                "symbol": "fn_call"
+              },
+              {
+                "bytes": "0000000000000000000000000000000000000000000000000000000000000001"
+              },
+              {
+                "symbol": "get_results"
               }
             ],
             "data": {
-              "bool": true
+              "u64": 0
+            }
+          }
+        }
+      },
+      "failed_call": false
+    },
+    {
+      "event": {
+        "ext": "v0",
+        "contract_id": "0000000000000000000000000000000000000000000000000000000000000001",
+        "type_": "diagnostic",
+        "body": {
+          "v0": {
+            "topics": [
+              {
+                "symbol": "fn_return"
+              },
+              {
+                "symbol": "get_results"
+              }
+            ],
+            "data": {
+              "vec": [
+                {
+                  "u32": 0
+                },
+                {
+                  "vec": [
+                    {
+                      "u64": 1
+                    },
+                    {
+                      "u64": 1
+                    }
+                  ]
+                },
+                {
+                  "u64": 2
+                },
+                {
+                  "bool": true
+                },
+                {
+                  "bool": true
+                }
+              ]
             }
           }
         }
