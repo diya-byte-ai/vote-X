@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useContract } from '../hooks/useContract';
 import { useWallet } from '../hooks/useWallet';
-import { Loader2, ArrowLeft, CheckCircle2, Wallet, ExternalLink, Copy, Hexagon } from 'lucide-react';
+import { Loader2, ArrowLeft, CheckCircle2, Wallet, ExternalLink, Copy, Hexagon, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CountdownTimer from '../components/CountdownTimer';
 import { formatXLM } from '../utils/format';
@@ -21,6 +21,14 @@ export default function ProposalDetail() {
   const [selectedOpt, setSelectedOpt] = useState(null);
   const [receipt, setReceipt] = useState(null);
   const [copied, setCopied] = useState(false);
+  // Ticks so the voting window closes in the UI the moment the deadline
+  // passes, rather than only on the next navigation.
+  const [nowSec, setNowSec] = useState(() => Math.floor(Date.now() / 1000));
+
+  useEffect(() => {
+    const t = setInterval(() => setNowSec(Math.floor(Date.now() / 1000)), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     // Top level load
@@ -57,6 +65,12 @@ export default function ProposalDetail() {
     
     if (selectedOpt === null) return;
 
+    // Re-check at click time: the deadline may have passed while the page was open.
+    if (Math.floor(Date.now() / 1000) > proposal.deadline || proposal.is_closed) {
+      toast.error("Voting has closed for this proposal.");
+      return;
+    }
+
     try {
       setVoteState('loading');
       const res = await vote(Number(id), selectedOpt, proposal.options[selectedOpt]);
@@ -91,6 +105,20 @@ export default function ProposalDetail() {
   if (!proposal) return <div className="text-center p-20 text-slate-400">Proposal not found or network error. Note: Contract must be deployed to load on-chain proposals.</div>;
 
   const minBalance = proposal?.min_balance ?? 0;
+
+  // The contract rejects these three cases, so the UI must not let a voter
+  // sign and pay for a transaction that is guaranteed to revert.
+  const notStarted = proposal.start_time > nowSec;
+  const expired = proposal.deadline < nowSec;
+  const votingOpen = !notStarted && !expired && !proposal.is_closed;
+
+  const closedReason = proposal.is_closed
+    ? 'This proposal has been closed by the admin. No further votes are accepted.'
+    : expired
+      ? 'Voting closed when the deadline passed. No further votes are accepted.'
+      : notStarted
+        ? `Voting opens ${new Date(proposal.start_time * 1000).toLocaleString()}.`
+        : null;
 
   return (
     <motion.div 
@@ -141,12 +169,12 @@ export default function ProposalDetail() {
                 <button
                   key={idx}
                   onClick={() => setSelectedOpt(idx)}
-                  disabled={voteState === 'loading' || voteState === 'success' || !!alreadyVotedObj}
+                  disabled={!votingOpen || voteState === 'loading' || voteState === 'success' || !!alreadyVotedObj}
                   className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center justify-between ${
                     (selectedOpt === idx || isVotedOption)
                       ? 'bg-cyan-900/30 border-cyan-400 shadow-[0_0_15px_rgba(0,255,255,0.2)]' 
                       : 'bg-slate-800 border-slate-700 hover:border-slate-500'
-                  } ${(voteState === 'loading' || alreadyVotedObj) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  } ${(voteState === 'loading' || alreadyVotedObj || !votingOpen) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <span className={`text-lg font-medium ${(selectedOpt === idx || isVotedOption) ? 'text-cyan-100' : 'text-slate-200'}`}>{opt}</span>
                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${(selectedOpt === idx || isVotedOption) ? 'border-cyan-400' : 'border-slate-500'}`}>
@@ -177,6 +205,11 @@ export default function ProposalDetail() {
                   </div>
                 )}
               </motion.div>
+            ) : !votingOpen ? (
+              <div className="w-full mt-8 py-5 px-6 rounded-xl bg-slate-800/60 border border-slate-700 flex items-center justify-center gap-3 text-center">
+                <ShieldAlert className="w-6 h-6 shrink-0 text-amber-400" />
+                <span className="text-base font-medium text-slate-300">{closedReason}</span>
+              </div>
             ) : (
               <motion.button
                 onClick={handleVoteClick}
