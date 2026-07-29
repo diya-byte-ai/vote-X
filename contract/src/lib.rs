@@ -267,23 +267,31 @@ impl VoxChainVotingContract {
         history
     }
     
-    // returns (winner_idx, vote_counts, total_votes, quorum_met)
-    pub fn get_results(env: Env, proposal_id: u64) -> (u32, Vec<u64>, u64, bool) {
+    // returns (winner_idx, vote_counts, total_votes, quorum_met, is_tie)
+    // When is_tie is true the winner_idx is only the first option holding the
+    // top count and must not be presented as the outcome.
+    pub fn get_results(env: Env, proposal_id: u64) -> (u32, Vec<u64>, u64, bool, bool) {
         let proposal: Proposal = env.storage().instance().get(&DataKey::Proposal(proposal_id)).unwrap();
         let mut winner_idx = 0;
         let mut max_votes = 0;
-        
+        let mut top_count = 0u32;
+
         for i in 0..proposal.options.len() {
             let count = proposal.vote_counts.get(i).unwrap();
             if count > max_votes {
                 max_votes = count;
                 winner_idx = i;
+                top_count = 1;
+            } else if count == max_votes {
+                top_count += 1;
             }
         }
-        
+
         let quorum_met = proposal.quorum == 0 || proposal.total_votes >= proposal.quorum;
-        
-        (winner_idx, proposal.vote_counts, proposal.total_votes, quorum_met)
+        // An all-zero board is not a tie, it is simply an unvoted proposal.
+        let is_tie = max_votes > 0 && top_count > 1;
+
+        (winner_idx, proposal.vote_counts, proposal.total_votes, quorum_met, is_tie)
     }
 
     pub fn get_admin(env: Env) -> Address {

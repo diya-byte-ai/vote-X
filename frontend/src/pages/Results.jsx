@@ -34,19 +34,22 @@ export default function Results() {
       ) : (
         <div className="space-y-6">
           {closed.map((p, i) => {
-             // Basic fallback logic reading array to determine winner
+             // Mirrors the contract's get_results: the top count can be shared,
+             // and a shared top is a tie rather than a win for the first option.
              let total = 0;
              let maxVotes = -1;
-             let winnerIdx = -1;
-             p.vote_counts?.forEach((count, idx) => {
+             p.vote_counts?.forEach((count) => {
                const c = Number(count);
                total += c;
-               if (c > maxVotes) {
-                 maxVotes = c;
-                 winnerIdx = idx;
-               }
+               if (c > maxVotes) maxVotes = c;
              });
-             
+
+             const topIndexes = (p.vote_counts || [])
+               .map((count, idx) => (Number(count) === maxVotes ? idx : -1))
+               .filter(idx => idx !== -1);
+             const isTie = maxVotes > 0 && topIndexes.length > 1;
+             const winnerIdx = isTie ? -1 : (topIndexes[0] ?? -1);
+
              // Check quorum logic fallback
              const quorum = Number(p.quorum);
              const quorumMet = quorum === 0 || total >= quorum;
@@ -72,18 +75,30 @@ export default function Results() {
                     const count = p.vote_counts ? Number(p.vote_counts[oIdx]) : 0;
                     let percentage = total > 0 ? Math.round((count / total) * 100) : 0;
                     const isWinner = oIdx === winnerIdx && quorumMet;
+                    const isTied = isTie && quorumMet && topIndexes.includes(oIdx);
+                    const highlight = isWinner
+                      ? 'text-emerald-300 font-bold'
+                      : isTied
+                        ? 'text-amber-300 font-bold'
+                        : 'text-slate-300';
                     return (
                       <div key={oIdx} className="relative">
                         <div className="flex justify-between text-sm mb-1 z-10 px-1">
-                          <span className={`${isWinner ? 'text-emerald-300 font-bold' : 'text-slate-300'}`}>{opt}</span>
-                          <span className={`${isWinner ? 'text-emerald-300 font-bold' : 'text-slate-400'}`}>{percentage}% ({count})</span>
+                          <span className={highlight}>{opt}</span>
+                          <span className={isWinner || isTied ? highlight : 'text-slate-400'}>{percentage}% ({count})</span>
                         </div>
                         <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                          <motion.div 
+                          <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${percentage}%` }}
                             transition={{ duration: 1, ease: "easeOut" }}
-                            className={`h-full ${isWinner ? 'bg-gradient-to-r from-emerald-500 to-cyan-400' : 'bg-slate-700'}`}
+                            className={`h-full ${
+                              isWinner
+                                ? 'bg-gradient-to-r from-emerald-500 to-cyan-400'
+                                : isTied
+                                  ? 'bg-gradient-to-r from-amber-500 to-amber-300'
+                                  : 'bg-slate-700'
+                            }`}
                           />
                         </div>
                       </div>
@@ -104,10 +119,17 @@ export default function Results() {
                     )}
                   </div>
                   <div className="text-sm">
-                    {quorumMet && maxVotes > 0 ? (
-                      <span className="text-white">Winner: <span className="text-emerald-400 font-bold">{p.options[winnerIdx]}</span></span>
-                    ) : (
+                    {!quorumMet || maxVotes <= 0 ? (
                       <span className="text-slate-500 italic">No valid outcome</span>
+                    ) : isTie ? (
+                      <span className="text-white">
+                        Tie: <span className="text-amber-400 font-bold">
+                          {topIndexes.map(idx => p.options[idx]).join(' / ')}
+                        </span>
+                        <span className="text-slate-500"> — {maxVotes} votes each</span>
+                      </span>
+                    ) : (
+                      <span className="text-white">Winner: <span className="text-emerald-400 font-bold">{p.options[winnerIdx]}</span></span>
                     )}
                   </div>
                 </div>
