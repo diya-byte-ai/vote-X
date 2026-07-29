@@ -38,6 +38,38 @@ export const useContract = () => {
     return null;
   };
 
+  // The SDK exposes the real fee the network charged on the transaction
+  // result; shape differs slightly across SDK versions, so probe defensively.
+  const extractFeeCharged = (txResponse) => {
+    try {
+      const raw = txResponse?.resultXdr?.feeCharged?.();
+      if (raw === undefined || raw === null) return null;
+      return Number(raw.toString());
+    } catch {
+      return null;
+    }
+  };
+
+  // Looks a transaction up on the network itself, so anyone can verify a
+  // hash they did not submit from this browser.
+  const getTransactionDetails = useCallback(async (hash) => {
+    try {
+      const server = getServer();
+      const tx = await server.getTransaction(hash);
+      if (!tx || tx.status === 'NOT_FOUND') return null;
+      return {
+        hash,
+        status: tx.status,
+        ledger: tx.ledger ?? null,
+        createdAt: tx.createdAt ? Number(tx.createdAt) * 1000 : null,
+        feeCharged: extractFeeCharged(tx),
+      };
+    } catch (e) {
+      console.warn('[Votex] getTransactionDetails failed:', e);
+      return null;
+    }
+  }, [getServer]);
+
   const submitAndPoll = async (server, signedTx) => {
     const res = await server.sendTransaction(signedTx);
     if (res.status === "ERROR") {
@@ -407,6 +439,7 @@ export const useContract = () => {
     closeProposal,
     hasVoted,
     getVoterHistory,
+    getTransactionDetails,
     vote,
     getStats,
     donateXLM,
