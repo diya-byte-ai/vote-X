@@ -108,6 +108,28 @@ export const useContract = () => {
     return null;
   }, []);
 
+  // Reads the voter's full history straight from the contract, so the record
+  // survives a cleared cache or a different browser/device.
+  const getVoterHistory = useCallback(async (voterAddress) => {
+    const who = voterAddress || address;
+    if (!who || !CONTRACT_ID) return [];
+    try {
+      const addrScVal = new StellarSdk.Address(who).toScVal();
+      const res = await simulateReadOnly('get_voter_history', [addrScVal]);
+      if (!Array.isArray(res)) return [];
+      return res.map(r => ({
+        proposalId: Number(r.proposal_id),
+        optionIdx: Number(r.option_idx),
+        // Contract timestamps are ledger seconds; the UI works in millis.
+        votedAt: Number(r.voted_at) * 1000,
+        txHash: r.tx_hash || null,
+      }));
+    } catch (e) {
+      console.warn('[Votex] getVoterHistory failed:', e);
+      return [];
+    }
+  }, [address]);
+
   const hasVoted = useCallback(async (proposalId) => {
     if (!address) return null;
     
@@ -384,6 +406,7 @@ export const useContract = () => {
     createProposal,
     closeProposal,
     hasVoted,
+    getVoterHistory,
     vote,
     getStats,
     donateXLM,

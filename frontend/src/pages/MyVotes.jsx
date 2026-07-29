@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useContract } from '../hooks/useContract';
+import { formatXLM } from '../utils/format';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -26,47 +27,81 @@ const itemVariants = {
 
 export default function MyVotes() {
   const { address, openModal } = useWallet();
-  const { getProposal } = useContract();
+  const { getProposal, getVoterHistory } = useContract();
   const [copiedHash, setCopiedHash] = useState(null);
   const [history, setHistory] = useState([]);
-  
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     if (!address) {
       setHistory([]);
       return;
     }
-    
-    // Find all localStorage items that match `voted_${address}_${proposalId}`
-    const loadHistory = async () => {
-      const records = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith(`voted_${address}_`)) {
-          try {
-            const proposalIdStr = key.replace(`voted_${address}_`, '');
-            const val = JSON.parse(localStorage.getItem(key));
-            
-            // Try formatting title by requesting it dynamically
-            // (A cache could be added here, but doing it raw is fine for history view)
-            const p = await getProposal(Number(proposalIdStr)).catch(() => null);
-            records.push({
-              id: proposalIdStr + Date.now(), // Key fallback
-              proposalId: Number(proposalIdStr),
-              proposalTitle: p ? p.title : `Proposal #${proposalIdStr}`,
-              optionVoted: val.choice,
-              timestamp: val.timestamp || Date.now(),
-              txHash: val.txHash || 'N/A: Queried via SC directly',
-              fee: val.fee || 10000
-            });
-          } catch(e) { }
-        }
+
+    let cancelled = false;
+
+    // The contract is the source of truth for *which* proposals this wallet
+    // voted on, so the history is identical on any browser or device.
+    // localStorage is only consulted afterwards to enrich a record with the
+    // tx hash and fee, which are known to the device that submitted the vote.
+    const readLocalReceipt = (proposalId) => {
+      try {
+        const raw = localStorage.getItem(`voted_${address}_${proposalId}`);
+        return raw ? JSON.parse(raw) : null;
+      } catch {
+        return null;
       }
-      records.sort((a,b) => b.timestamp - a.timestamp);
-      setHistory(records);
     };
-    
+
+    const loadHistory = async () => {
+      setLoading(true);
+      try {
+        const onChain = await getVoterHistory(address);
+
+        // Fall back to any locally cached receipts the chain query missed
+        // (e.g. contract unreachable) so the page is never emptier than before.
+        const seen = new Set(onChain.map(r => r.proposalId));
+        const localOnly = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.startsWith(`voted_${address}_`)) continue;
+          const pid = Number(key.replace(`voted_${address}_`, ''));
+          if (Number.isNaN(pid) || seen.has(pid)) continue;
+          localOnly.push({ proposalId: pid, optionIdx: null, votedAt: null, txHash: null });
+        }
+
+        const records = await Promise.all(
+          [...onChain, ...localOnly].map(async (rec) => {
+            const p = await getProposal(rec.proposalId).catch(() => null);
+            const receipt = readLocalReceipt(rec.proposalId);
+            const optionText =
+              rec.optionIdx !== null && p?.options?.[rec.optionIdx] !== undefined
+                ? p.options[rec.optionIdx]
+                : receipt?.choice ?? 'Unknown option';
+
+            return {
+              id: `proposal-${rec.proposalId}`,
+              proposalId: rec.proposalId,
+              proposalTitle: p ? p.title : `Proposal #${rec.proposalId}`,
+              optionVoted: optionText,
+              timestamp: rec.votedAt || receipt?.timestamp || null,
+              txHash: rec.txHash || receipt?.txHash || null,
+              fee: receipt?.fee ?? null,
+              verifiedOnChain: rec.optionIdx !== null,
+            };
+          })
+        );
+
+        records.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        if (!cancelled) setHistory(records);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
     loadHistory();
-  }, [address, getProposal]);
+    return () => { cancelled = true; };
+  }, [address, getProposal, getVoterHistory]);
 
   const handleCopy = (hash) => {
     if (hash && hash !== 'N/A: Queried via SC directly') {
@@ -93,6 +128,11 @@ export default function MyVotes() {
             <Wallet className="w-5 h-5" />
             Connect Wallet
           </button>
+        </div>
+      ) : loading ? (
+        <div className="glass-panel p-16 text-center rounded-3xl border border-dashed border-slate-700">
+          <Hexagon className="w-12 h-12 text-cyan-400 mx-auto mb-4 animate-[spin_2s_linear_infinite]" />
+          <p className="text-slate-400">Reading your voting record from the contract…</p>
         </div>
       ) : history.length === 0 ? (
         <div className="glass-panel p-16 text-center rounded-3xl border border-dashed border-slate-700">
@@ -124,9 +164,14 @@ export default function MyVotes() {
               
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="flex-1">
-                  <div className="text-xs text-slate-500 tracking-widest uppercase mb-1 flex items-center gap-2">
+                  <div className="text-xs text-slate-500 tracking-widest uppercase mb-1 flex items-center gap-2 flex-wrap">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    Voted {new Date(record.timestamp).toLocaleDateString()}
+                    Voted {record.timestamp ? new Date(record.timestamp).toLocaleDateString() : 'date unknown'}
+                    {record.verifiedOnChain && (
+                      <span className="normal-case tracking-normal text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        Verified on-chain
+                      </span>
+                    )}
                   </div>
                   <h4 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-300 transition-colors">
                     {record.proposalTitle}
@@ -141,10 +186,12 @@ export default function MyVotes() {
                     <div>
                       <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Transaction Hash</div>
                       <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded border border-slate-800">
-                        <span className="text-cyan-400 font-mono text-xs truncate flex-1">
-                          {record.txHash !== 'N/A: Queried via SC directly' ? `${record.txHash.slice(0,10)}...${record.txHash.slice(-8)}` : record.txHash}
+                        <span className={`font-mono text-xs truncate flex-1 ${record.txHash ? 'text-cyan-400' : 'text-slate-500 italic'}`}>
+                          {record.txHash
+                            ? `${record.txHash.slice(0,10)}...${record.txHash.slice(-8)}`
+                            : 'Submitted from another device'}
                         </span>
-                        {record.txHash !== 'N/A: Queried via SC directly' && (
+                        {record.txHash && (
                           <div className="flex gap-1 shrink-0">
                             <button onClick={() => handleCopy(record.txHash)} className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white transition-colors" title="Copy">
                               {copiedHash === record.txHash ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
@@ -163,10 +210,12 @@ export default function MyVotes() {
                       </div>
                     </div>
                     
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-emerald-500/80 text-[10px] uppercase tracking-wider">💸 Network Fee Paid</span>
-                      <span className="text-emerald-400 font-mono">{record.fee} stroops <span className="text-emerald-500/50">({(record.fee / 10000000).toFixed(6)} XLM)</span></span>
-                    </div>
+                    {record.fee !== null && (
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-emerald-500/80 text-[10px] uppercase tracking-wider">💸 Network Fee Paid</span>
+                        <span className="text-emerald-400 font-mono">{record.fee} stroops <span className="text-emerald-500/50">({formatXLM(record.fee)} XLM)</span></span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
