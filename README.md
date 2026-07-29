@@ -67,45 +67,6 @@ Watch the full demo on YouTube: [youtube](https://youtu.be/4sjdBQs5QQQ)
 
 ---
 
-## 🧾 Improvement Summary
-
-After the judges' review, feedback was collected from onboarded users through the Google Form linked above. Every reported issue was reproduced in the code, fixed, and committed individually so that each improvement is traceable to a single commit.
-
-**11 users onboarded · 10 issues reported · 10 issues fixed · 5/5 contract tests passing**
-
-| # | Improvement | Layer | Commit |
-|---|-------------|-------|--------|
-| 1 | Minimum balance requirement was rendered in stroops but labelled XLM, showing a 5 XLM gate as "50000000 XLM". Added a shared stroops→XLM formatter. | Frontend | [`c3337c9`](https://github.com/diya-byte-ai/vote-X/commit/c3337c9d0583c81c0d10d2020daf9c3a13ebab83) |
-| 2 | Voting history was rebuilt from `localStorage`, so it vanished on another browser or device. Now read from the contract via `get_voter_history`. | Frontend | [`6dd21cb`](https://github.com/diya-byte-ai/vote-X/commit/6dd21cb6792212b31bbe931cbba9e0c17286e9d3) |
-| 3 | The Verify page only searched this browser's cache, so another user's transaction hash always returned "Record Not Found". Now resolved against the Soroban RPC and the contract. | Frontend | [`c5b04de`](https://github.com/diya-byte-ai/vote-X/commit/c5b04decb3c8b505120151767d2c0e685d716ccf) |
-| 4 | Cast Vote stayed enabled after the deadline, so voters signed and paid for transactions that reverted. The voting window is now enforced in the UI and ticks live. | Frontend | [`49d5d70`](https://github.com/diya-byte-ai/vote-X/commit/49d5d705114019d47c0cf1b01c0505c0145139c9) |
-| 5 | Every failure showed "Transaction failed or rejected". Contract error codes 1–11 plus wallet and network failures are now decoded into actionable messages. | Frontend | [`dfa6bca`](https://github.com/diya-byte-ai/vote-X/commit/dfa6bca24137820cecb87c0e55ba009a8168d468) |
-| 6 | Confirmation polling looped forever on a stalled transaction. Now bounded at 60s with a message naming the hash to check before retrying. | Frontend | [`a539f5e`](https://github.com/diya-byte-ai/vote-X/commit/a539f5e52ac8591f30ca84df9ba5332c30808e5f) |
-| 7 | The signing modal promised "~2,000 stroops" while receipts reported a hardcoded 10,000. Receipts now report the fee the network actually charged. | Frontend | [`23ecca7`](https://github.com/diya-byte-ai/vote-X/commit/23ecca79c418cb480a0ce11cb8ccc7fc64fe7c14) |
-| 8 | Active Proposals had no way to find a specific proposal. Added search, category filter and sorting. | Frontend | [`b8cc4b1`](https://github.com/diya-byte-ai/vote-X/commit/b8cc4b1884666212fd34c7779fedf382e13117e2) |
-| 9 | Tied results silently crowned the lowest-indexed option. `get_results` now returns `is_tie` and the UI reports a tie. | Contract + Frontend | [`00bf332`](https://github.com/diya-byte-ai/vote-X/commit/00bf332403ee1f91bed646dbecd5e838ab57971b) |
-| 10 | Every proposal and vote shared one bounded instance-storage entry and one TTL. Each now has its own persistent entry with TTL renewal. | Contract | [`9e61666`](https://github.com/diya-byte-ai/vote-X/commit/9e6166691ea82aea14c985bcbf3e43e514782d7b) |
-
----
-
-
----
-
-## 🛠️ Feedback Implementation
-
-| User ID | Name | Email | Wallet Address | Feedback Summary | Improvement Made | Git Commit ID |
-|---------|------|-------|----------------|------------------|------------------|---------------|
-| U01 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | Minimum balance shown as "50000000 XLM" instead of 5 XLM | Added a shared stroops→XLM formatter and applied it to the eligibility badge | [`c3337c9`](https://github.com/diya-byte-ai/vote-X/commit/c3337c9d0583c81c0d10d2020daf9c3a13ebab83) |
-| U02 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | Voting history disappeared on a different device | History now read from the contract via a new `getVoterHistory()`; localStorage only enriches the tx hash and fee | [`6dd21cb`](https://github.com/diya-byte-ai/vote-X/commit/6dd21cb6792212b31bbe931cbba9e0c17286e9d3) |
-| U03 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | Could not verify another user's transaction hash | Verify now queries the Soroban RPC for a hash and `get_voter_history` for an address, with input validation | [`c5b04de`](https://github.com/diya-byte-ai/vote-X/commit/c5b04decb3c8b505120151767d2c0e685d716ccf) |
-| U04 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | Paid a fee voting on an already-expired proposal | Voting window derived from `start_time`, `deadline` and `is_closed`, ticking every second; options disabled and the state explained | [`49d5d70`](https://github.com/diya-byte-ai/vote-X/commit/49d5d705114019d47c0cf1b01c0505c0145139c9) |
-| U05 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | One generic message for every kind of failure | Added `parseTxError()` decoding `Error(Contract, #N)` into the matching message, plus wallet/network cases | [`dfa6bca`](https://github.com/diya-byte-ai/vote-X/commit/dfa6bca24137820cecb87c0e55ba009a8168d468) |
-| U06 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | UI hung indefinitely on "Submitting to Chain…" | Polling bounded to 60s, tolerating transient RPC failures, and reports the tx hash to check before retrying | [`a539f5e`](https://github.com/diya-byte-ai/vote-X/commit/a539f5e52ac8591f30ca84df9ba5332c30808e5f) |
-| U07 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | Fee estimate contradicted the fee on the receipt | `feeCharged` read off the transaction result for receipts; the modal quotes the single max-fee constant | [`23ecca7`](https://github.com/diya-byte-ai/vote-X/commit/23ecca79c418cb480a0ce11cb8ccc7fc64fe7c14) |
-| U08 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | No way to find a proposal in a long list | Added search across title/description/options, a category filter built from on-chain data, and three sort orders | [`b8cc4b1`](https://github.com/diya-byte-ai/vote-X/commit/b8cc4b1884666212fd34c7779fedf382e13117e2) |
-| U09 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | A tied result still declared a winner | `get_results` returns `is_tie`; tied options render in amber and the outcome reads "Tie: A / B". Two contract tests added | [`00bf332`](https://github.com/diya-byte-ai/vote-X/commit/00bf332403ee1f91bed646dbecd5e838ab57971b) |
-| U10 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | Proposals stopped loading after heavy testing | Proposals and vote records moved to per-entry persistent storage with 90-day TTL renewal; instance storage keeps only admin, token and count | [`9e61666`](https://github.com/diya-byte-ai/vote-X/commit/9e6166691ea82aea14c985bcbf3e43e514782d7b) |
-| U11 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | No problems encountered | No change required. Positive path confirmed working; retained as a regression baseline | — |
 
 ---
 
