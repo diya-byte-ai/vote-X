@@ -5,6 +5,7 @@ import { useWallet } from '../hooks/useWallet';
 import { Loader2, ArrowLeft, CheckCircle2, Wallet, ExternalLink, Copy, Hexagon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CountdownTimer from '../components/CountdownTimer';
+import { formatXLM } from '../utils/format';
 import toast from 'react-hot-toast';
 
 export default function ProposalDetail() {
@@ -115,7 +116,7 @@ export default function ProposalDetail() {
             </h1>
             {minBalance > 0 && (
                <div className="inline-flex items-center text-sm text-purple-300 bg-purple-900/30 px-3 py-1 rounded-full border border-purple-500/30 mt-2">
-                 <Wallet className="w-4 h-4 mr-2" /> Minimum Balance Required: {minBalance} XLM
+                 <Wallet className="w-4 h-4 mr-2" /> Minimum Balance Required: {formatXLM(minBalance)} XLM
                </div>
             )}
           </div>
