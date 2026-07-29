@@ -8,6 +8,11 @@ const RPC_URL = import.meta.env.VITE_RPC_URL || 'https://soroban-testnet.stellar
 const NETWORK_PASSPHRASE = (import.meta.env.VITE_NETWORK_PASSPHRASE || StellarSdk.Networks.TESTNET).replace(/['"]/g, "");
 const CONTRACT_ID = import.meta.env.VITE_CONTRACT_ID || '';
 
+// Confirmation polling is bounded so a stalled transaction surfaces as a
+// clear timeout instead of an endless spinner.
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 60000;
+
 export const useContract = () => {
   const { address, setNetworkFee, activeWallet } = useWallet();
   const [loading, setLoading] = useState(false);
@@ -75,17 +80,35 @@ export const useContract = () => {
     if (res.status === "ERROR") {
       throw new Error("Transaction submission failed: " + JSON.stringify(res.errorResultXdr || res));
     }
-    
+
     let status = res.status;
     let txResponse;
-    
-    // Poll until not pending
+    const giveUpAt = Date.now() + POLL_TIMEOUT_MS;
+
+    // Poll until the ledger settles, but never indefinitely: an unbounded
+    // loop left the UI spinning with no way to tell whether the vote landed.
     while (status === "PENDING" || status === "NOT_FOUND") {
-      await new Promise(r => setTimeout(r, 2000));
-      txResponse = await server.getTransaction(res.hash);
-      status = txResponse.status;
+      if (Date.now() >= giveUpAt) {
+        const err = new Error(
+          `Timed out after ${POLL_TIMEOUT_MS / 1000}s waiting for confirmation.`
+        );
+        err.userMessage =
+          `Still unconfirmed after ${POLL_TIMEOUT_MS / 1000} seconds. The transaction may yet settle — ` +
+          `check hash ${res.hash} on Stellar Expert before retrying, so you don't submit twice.`;
+        throw err;
+      }
+
+      await new Promise(r => setTimeout(r, POLL_INTERVAL_MS));
+
+      try {
+        txResponse = await server.getTransaction(res.hash);
+        status = txResponse.status;
+      } catch (e) {
+        // A dropped RPC poll is transient; keep trying until the deadline.
+        console.warn("[Votex] poll failed, retrying:", e);
+      }
     }
-    
+
     if (status !== "SUCCESS") {
       throw new Error(`Transaction failed on-chain with status: ${status}`);
     }

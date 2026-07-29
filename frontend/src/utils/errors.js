@@ -19,6 +19,10 @@ const CONTRACT_ERRORS = {
 const CONTRACT_CODE = /Error\(Contract,\s*#(\d+)\)/;
 
 export const parseTxError = (err) => {
+  // An error that already carries a message written for the user wins:
+  // the confirmation timeout, for instance, includes the tx hash to check.
+  if (err?.userMessage) return err.userMessage;
+
   const msg =
     typeof err === 'string'
       ? err
