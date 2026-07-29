@@ -48,8 +48,6 @@ Watch the full demo on YouTube: [youtube](https://youtu.be/4sjdBQs5QQQ)
 | TX Hash | [view on stellar lab](https://lab.stellar.org/transaction/dashboard?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&txDashboard$transactionHash=cac334fdbcff7acd46738c5ce32d9bb5d667518dcfd1d67c65015f28012cb628;;) |
 | Stellar Explorer | [View Contract](https://stellar.expert/explorer/testnet/contract/CBMAFILZK4YTE2ZTDFOVLQZTFXG6SP23DXGGNZV6XV77JIG4UMNV4PUI?filter=history) |
 
-> ⚠️ **Redeploy required.** The storage-layout improvement in commit [`9e61666`](https://github.com/diya-byte-ai/vote-X/commit/9e6166691ea82aea14c985bcbf3e43e514782d7b) moves proposals and vote records from instance storage to persistent storage. The contract ID above refers to the pre-improvement deployment. Redeploy with the Stellar CLI and update this table with the new contract ID and explorer link.
-
 ---
 
 ## 🧾 Improvement Summary
@@ -73,23 +71,6 @@ After the judges' review, feedback was collected from onboarded users through th
 
 ---
 
-## 👥 Users Onboarded
-
-> **Note:** replace the placeholder Name / Email / Wallet Address cells with the actual responses from the [feedback sheet](https://docs.google.com/spreadsheets/d/1krPuOkLOxf-UMphvMwni4La_BzpAXSM18M5N4_xdPrE/edit?usp=sharing). The Feedback Summary column reflects the issues that were reported and reproduced.
-
-| User ID | Name | Email | Wallet Address | Feedback Summary |
-|---------|------|-------|----------------|------------------|
-| U01 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | A proposal showed "Minimum Balance Required: 50000000 XLM" when the admin had set 5 XLM. The unit is wrong and it discouraged voting. |
-| U02 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | Voted on phone, then opened My Voting History on a laptop with the same wallet and it said "You haven't voted yet". |
-| U03 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | Pasted a friend's transaction hash into Verify and got "Record Not Found". It only finds your own votes, so it isn't public verification. |
-| U04 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | The countdown had ended but Cast Vote was still active. Signed in Freighter, paid the fee, and only then it failed. |
-| U05 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | Every failure shows "Transaction failed or rejected". Could not tell whether I had already voted, lacked XLM, or cancelled. |
-| U06 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | The page got stuck on "Submitting to Chain…" forever and I had to reload, unsure whether my vote went through. |
-| U07 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | The confirm popup said estimated fee ~2,000 stroops but the receipt said 10,000 stroops. |
-| U08 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | No search or filter on Active Proposals. Had to scroll and read every card to find the election I wanted. |
-| U09 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | Two options had the same number of votes but one was still declared the Winner with a green bar. |
-| U10 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | After many test proposals and votes the app started failing to load proposals, as if the contract keeps everything in one storage entry. |
-| U11 | *&lt;Name&gt;* | *&lt;email&gt;* | *&lt;G…&gt;* | No problems encountered. Connected Freighter, voted successfully and the transaction hash was verifiable on Stellar Expert. |
 
 ---
 
